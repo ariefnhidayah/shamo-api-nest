@@ -1,5 +1,12 @@
+import { ApiProperty } from "@nestjs/swagger"
+
 export class GetProductsDto {
-    public order_by?: string
-    public category_id?: string
-    public limit?: string
+    @ApiProperty({ required: false })
+    public order_by: string
+
+    @ApiProperty({ required: false })
+    public category_id: string
+
+    @ApiProperty({ required: false })
+    public limit: string
 }
