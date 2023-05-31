@@ -53,6 +53,7 @@ export class ProductsService {
             .addSelect('p.price')
             .addSelect('p.description')
             .addSelect('p.tags')
+            .addSelect('p.viewed')
             .leftJoin('p.category', 'category')
             .addSelect(['category.name'])
             .where({ id })
@@ -70,6 +71,8 @@ export class ProductsService {
             .where("pg.product_id = :id", { id })
             .orderBy('pg.is_primary', 'DESC')
             .getMany()
+
+        await this.productRepository.update({ id }, {viewed: product.viewed + 1})
 
         response.data = {
             ...product,
