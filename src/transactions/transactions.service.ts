@@ -1,11 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ProductCategory } from "src/entities/product-category.entity";
 import { ProductGallery } from "src/entities/product-gallery.entity";
 import { Product } from "src/entities/product.entity";
 import { TransactionItem } from "src/entities/transaction-item.entity";
 import { Transaction } from "src/entities/transaction.entity";
-import { User } from "src/entities/user.entity";
 import { ResponseApi } from "src/response-api";
 import { DataSource, IsNull, Repository } from "typeorm";
 import { CreateTransactionDto } from "./dto/create-transaction.dto";
@@ -18,10 +16,8 @@ export class TransactionsService {
   constructor(
     @InjectRepository(Transaction) private transaction: Repository<Transaction>,
     @InjectRepository(TransactionItem) private transactionItem: Repository<TransactionItem>,
-    @InjectRepository(User) private user: Repository<User>,
     @InjectRepository(Product) private product: Repository<Product>,
     @InjectRepository(ProductGallery) private productGallery: Repository<ProductGallery>,
-    @InjectRepository(ProductCategory) private productCategory: Repository<ProductCategory>,
     private dataSource: DataSource
   ) { }
 

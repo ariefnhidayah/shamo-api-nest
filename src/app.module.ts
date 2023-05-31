@@ -13,7 +13,8 @@ import { Product } from './entities/product.entity';
 import { User } from './entities/user.entity';
 import { Transaction } from './entities/transaction.entity';
 import { TransactionsModule } from './transactions/transactions.module';
-console.log(__dirname + "/../src/entities/*.entity.ts")
+import { AuthenticationModule as AdminAuthenticationModule } from './admin/authentication/authentication.module'
+import { ProductCategoriesModule as AdminProductCategoriesModule } from './admin/product-categories/product-categories.module'
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -33,6 +34,8 @@ console.log(__dirname + "/../src/entities/*.entity.ts")
     ProductsModule,
     ProductCategoriesModule,
     TransactionsModule,
+    AdminAuthenticationModule,
+    AdminProductCategoriesModule
   ],
   controllers: [AppController],
   providers: [AppService],
