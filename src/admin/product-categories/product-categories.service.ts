@@ -5,13 +5,15 @@ import { DataSource, Repository } from "typeorm";
 import { CreateCategoryDto } from "./dto/create-category.dto";
 import { ResponseApi } from "src/response-api";
 import { GetCategoryDto } from "./dto/get-category.dto";
+import { DateLibService } from "@app/date-lib";
 const Validator = require("fastest-validator");
 
 @Injectable()
 export class ProductCategoriesService {
   constructor(
     @InjectRepository(ProductCategory) private productCategoryRepository: Repository<ProductCategory>,
-    private dataSource: DataSource
+    private dataSource: DataSource,
+    private dateLibService: DateLibService
   ) { }
 
   async get(request, getCategoryDto: GetCategoryDto): Promise<ResponseApi> {
@@ -44,6 +46,7 @@ export class ProductCategoriesService {
       .addSelect('name')
       .limit(limit)
       .offset(offset)
+      .where('deleted_at is null')
 
     if (q != '') {
       categories.where(`name like '%${q}%'`)
@@ -135,6 +138,28 @@ export class ProductCategoriesService {
 
     response.success = true
     response.data = null
+    return response
+  }
+
+  async delete(request, id: number): Promise<ResponseApi> {
+    const response = new ResponseApi()
+
+    const userData = request.user.data
+    if (userData.role_id != 1) {
+      throw new UnauthorizedException()
+    }
+
+    const category = await this.productCategoryRepository.findOne({ where: { id } })
+    if (!category) {
+      throw new HttpException(null, HttpStatus.NOT_FOUND, { cause: new Error('Data not found!') })
+    }
+
+    await this.productCategoryRepository.update({
+      id
+    }, {
+      deleted_at: this.dateLibService.getDateNow(),
+    })
+
     return response
   }
 

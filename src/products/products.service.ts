@@ -31,6 +31,7 @@ export class ProductsService {
             .leftJoin('p.galleries', 'galleries', 'galleries.is_primary = 1')
             .addSelect(['galleries.url'])
             .where('p.deleted_at is null')
+            .andWhere('category.deleted_at is null')
             .orderBy(order_by == 'popular' ? 'p.viewed' : 'p.id', 'DESC')
 
         if (category_id != null && category_id != '') {
@@ -58,6 +59,7 @@ export class ProductsService {
             .addSelect(['category.name'])
             .where({ id })
             .andWhere('p.deleted_at is null')
+            .andWhere('category.deleted_at is null')
             .getOne()
 
         if (!product) {

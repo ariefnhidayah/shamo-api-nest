@@ -6,6 +6,8 @@ import { CreateProductDto } from "./dto/create-product.dto";
 import { ResponseApi } from "src/response-api";
 import { ProductGallery } from "src/entities/product-gallery.entity";
 import { ProductCategory } from "src/entities/product-category.entity";
+import { GetsProductDto } from "./dto/gets-product.dto";
+import { DateLibService } from "@app/date-lib";
 const Validator = require("fastest-validator");
 
 @Injectable()
@@ -13,7 +15,9 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product) private productsRepository: Repository<Product>,
     @InjectRepository(ProductCategory) private productCategoryRepository: Repository<ProductCategory>,
-    private dataSource: DataSource
+    @InjectRepository(ProductGallery) private productGalleryRepository: Repository<ProductGallery>,
+    private dataSource: DataSource,
+    private dateLibService: DateLibService
   ) { }
 
   async add(request, createProductDto: CreateProductDto): Promise<ResponseApi> {
@@ -148,6 +152,126 @@ export class ProductsService {
       console.log(error)
       throw new HttpException(null, HttpStatus.INTERNAL_SERVER_ERROR, { cause: new Error("") })
     }
+  }
+
+  async gets(request, getsProductDto: GetsProductDto): Promise<ResponseApi> {
+    const response = new ResponseApi()
+
+    let { page, limit, q, category_id } = getsProductDto
+
+    if (!page) {
+      page = 1
+    }
+
+    if (!limit) {
+      limit = 10
+    }
+
+    if (!q) {
+      q = ''
+    }
+
+    let offset = (page - 1) * limit
+
+    const userData = request.user.data
+    if (userData.role_id != 1) {
+      throw new UnauthorizedException()
+    }
+
+    const products = this.productsRepository
+      .createQueryBuilder('p')
+      .select('p.id')
+      .addSelect('p.name')
+      .addSelect('p.price')
+      .addSelect('p.description')
+      .addSelect('p.tags')
+      .limit(limit)
+      .offset(offset)
+      .leftJoin('p.category', 'category')
+      .addSelect(['category.name'])
+      .leftJoin('p.galleries', 'galleries', 'galleries.is_primary = 1')
+      .addSelect(['galleries.url'])
+      .where('p.deleted_at is null')
+      .andWhere('category.deleted_at is null')
+
+    if (category_id != null && category_id != undefined) {
+      products.andWhere('p.category_id = :category_id', { category_id })
+    }
+
+    if (q != '') {
+      products.andWhere('p.name like "%:q%"', { q })
+    }
+
+    response.data = {
+      data: await products.getMany(),
+      count: await products.getCount()
+    }
+
+    response.success = true
+
+    return response
+  }
+
+  async get(request, id: number): Promise<ResponseApi> {
+    const response = new ResponseApi()
+
+    const userData = request.user.data
+    if (userData.role_id != 1) {
+      throw new UnauthorizedException()
+    }
+
+    const product = await this.productsRepository
+      .createQueryBuilder('p')
+      .select('p.id')
+      .addSelect('p.name')
+      .addSelect('p.price')
+      .addSelect('p.description')
+      .addSelect('p.tags')
+      .addSelect('p.viewed')
+      .addSelect('p.category_id')
+      .leftJoin('p.category', 'category')
+      .where("p.id = :id", { id })
+      .andWhere('p.deleted_at is null')
+      .andWhere('category.deleted_at is null')
+      .getOne()
+
+    if (!product) {
+      throw new HttpException(null, HttpStatus.NOT_FOUND, { cause: new Error("Product not found!") })
+    }
+
+    const galleries = await this.productGalleryRepository.find({ where: { product_id: id } })
+
+    response.data = {
+      ...product,
+      galleries
+    }
+    response.success = true
+
+    return response
+  }
+
+  async delete(request, id: number): Promise<ResponseApi> {
+    const response = new ResponseApi()
+
+    const userData = request.user.data
+    if (userData.role_id != 1) {
+      throw new UnauthorizedException()
+    }
+
+    const product = await this.productsRepository.findOne({ where: { id } })
+    if (!product) {
+      throw new HttpException(null, HttpStatus.NOT_FOUND, { cause: Error("Data not found!") })
+    }
+
+    await this.productsRepository.update({
+      id
+    }, {
+      deleted_at: this.dateLibService.getDateNow()
+    })
+
+    response.success = true
+
+    return response
   }
 
 }

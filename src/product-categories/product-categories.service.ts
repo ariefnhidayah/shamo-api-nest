@@ -19,6 +19,7 @@ export class ProductCategoriesService {
       .select('c.id')
       .addSelect('c.name')
       .orderBy(getProductCategoriesDto.order_by == 'a_z' || getProductCategoriesDto.order_by == 'z_a' ? 'name' : 'id', getProductCategoriesDto.order_by == 'a_z' ? 'ASC' : 'DESC')
+      .where('deleted_at is null')
       .getMany()
 
     response.data = categories

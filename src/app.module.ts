@@ -16,6 +16,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { AuthenticationModule as AdminAuthenticationModule } from './admin/authentication/authentication.module'
 import { ProductCategoriesModule as AdminProductCategoriesModule } from './admin/product-categories/product-categories.module'
 import { ProductsModule as AdminProductsModule } from './admin/products/products.module'
+import { DateLibModule } from '@app/date-lib';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -31,6 +32,7 @@ import { ProductsModule as AdminProductsModule } from './admin/products/products
       entities: [Product, ProductCategory, ProductGallery, Transaction, TransactionItem, User],
       logging: true,
     }),
+    DateLibModule,
     UsersModule,
     ProductsModule,
     ProductCategoriesModule,

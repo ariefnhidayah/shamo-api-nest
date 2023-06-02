@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ProductCategoriesService } from "./product-categories.service";
 import { AdminGuard } from "src/admin.guard";
@@ -21,7 +21,7 @@ export class ProductCategoriesController {
         return await this.productCategoriesService.add(req, createCategoryDto)
     }
 
-    @ApiOperation({ summary: "Get Category" })
+    @ApiOperation({ summary: "Gets Category" })
     @Get('/')
     @UseGuards(AdminGuard)
     async get(@Request() req, @Query() getCategoryDto: GetCategoryDto): Promise<ResponseApi> {
@@ -33,5 +33,12 @@ export class ProductCategoriesController {
     @UseGuards(AdminGuard)
     async update(@Request() req, @Param('id') id: number, @Body() createCategoryDto: CreateCategoryDto): Promise<ResponseApi> {
         return await this.productCategoriesService.update(req, id, createCategoryDto)
+    }
+
+    @ApiOperation({ summary: "Delete Category" })
+    @Delete('/:id')
+    @UseGuards(AdminGuard)
+    async delete(@Request() req, @Param('id') id: number): Promise<ResponseApi> {
+        return await this.productCategoriesService.delete(req, id)
     }
 }
