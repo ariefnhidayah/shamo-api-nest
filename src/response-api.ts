@@ -1,5 +1,5 @@
 export class ResponseApi {
-    public success: boolean = false
-    public message: string = ''
-    public data: any = null
+  public success = false;
+  public message = '';
+  public data: any = null;
 }

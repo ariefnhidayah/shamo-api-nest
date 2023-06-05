@@ -1,12 +1,12 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterDto {
-    @ApiProperty()
-    public name: string;
+  @ApiProperty()
+  public name: string;
 
-    @ApiProperty()
-    public email: string;
+  @ApiProperty()
+  public email: string;
 
-    @ApiProperty()
-    public password: string;
+  @ApiProperty()
+  public password: string;
 }

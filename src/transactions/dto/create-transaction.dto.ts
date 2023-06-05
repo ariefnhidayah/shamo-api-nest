@@ -1,16 +1,16 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { TransactionItemsDto } from "./transaction-items.dto"
+import { ApiProperty } from '@nestjs/swagger';
+import { TransactionItemsDto } from './transaction-items.dto';
 
 export class CreateTransactionDto {
   @ApiProperty()
-  public address: string
+  public address: string;
 
   @ApiProperty()
-  public shipping_price: number
+  public shipping_price: number;
 
   @ApiProperty({
     isArray: true,
-    type: TransactionItemsDto
+    type: TransactionItemsDto,
   })
-  public transaction_items: TransactionItemsDto[]
+  public transaction_items: TransactionItemsDto[];
 }

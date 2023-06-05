@@ -1,3 +1,3 @@
 export class GetProductCategoriesDto {
-    order_by: string
+  order_by: string;
 }

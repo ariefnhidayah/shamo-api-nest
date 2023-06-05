@@ -15,12 +15,12 @@ async function bootstrap() {
     .setDescription('The Shamo API')
     .setVersion('1.0')
     .addBearerAuth()
-    .build()
+    .build();
 
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);
 
-  app.enableCors()
+  app.enableCors();
 
   await app.listen(process.env.PORT);
   console.log(`Application is running on: ${await app.getUrl()}`);

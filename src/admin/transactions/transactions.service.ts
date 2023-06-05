@@ -1,47 +1,58 @@
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { Transaction } from "src/entities/transaction.entity";
-import { Repository } from "typeorm";
-import { GetsTransactionDto } from "./dto/gets-transaction.dto";
-import { ResponseApi } from "src/response-api";
-import { TransactionItem } from "src/entities/transaction-item.entity";
-import { DateLibService } from "@app/date-lib";
-import { User } from "src/entities/user.entity";
-import { ChangePaymentStatusDto } from "./dto/change-payment-status-dto";
-import { ChangeTransactionStatusDto } from "./dto/change-transaction-status-dto";
-const Validator = require("fastest-validator");
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Transaction } from 'src/entities/transaction.entity';
+import { Repository } from 'typeorm';
+import { GetsTransactionDto } from './dto/gets-transaction.dto';
+import { ResponseApi } from 'src/response-api';
+import { TransactionItem } from 'src/entities/transaction-item.entity';
+import { DateLibService } from '@app/date-lib';
+import { User } from 'src/entities/user.entity';
+import { ChangePaymentStatusDto } from './dto/change-payment-status-dto';
+import { ChangeTransactionStatusDto } from './dto/change-transaction-status-dto';
+const Validator = require('fastest-validator');
 
 @Injectable()
 export class TransactionsService {
   constructor(
-    @InjectRepository(Transaction) private transactionRepository: Repository<Transaction>,
-    @InjectRepository(TransactionItem) private transactionItemRepository: Repository<TransactionItem>,
+    @InjectRepository(Transaction)
+    private transactionRepository: Repository<Transaction>,
+    @InjectRepository(TransactionItem)
+    private transactionItemRepository: Repository<TransactionItem>,
     @InjectRepository(User) private userRepository: Repository<User>,
-    private dateLibService: DateLibService
-  ) { }
+    private dateLibService: DateLibService,
+  ) {}
 
-  async gets(request, getsTransactionDto: GetsTransactionDto): Promise<ResponseApi> {
-    const response = new ResponseApi()
+  async gets(
+    request,
+    getsTransactionDto: GetsTransactionDto,
+  ): Promise<ResponseApi> {
+    const response = new ResponseApi();
 
-    let { page, limit, q, payment_status, transaction_status } = getsTransactionDto
+    let { page, limit, q, payment_status, transaction_status } =
+      getsTransactionDto;
 
     if (!page) {
-      page = 1
+      page = 1;
     }
 
     if (!limit) {
-      limit = 10
+      limit = 10;
     }
 
     if (!q) {
-      q = ''
+      q = '';
     }
 
-    let offset = (page - 1) * limit
+    const offset = (page - 1) * limit;
 
-    const userData = request.user.data
+    const userData = request.user.data;
     if (userData.role_id != 1) {
-      throw new UnauthorizedException()
+      throw new UnauthorizedException();
     }
 
     const transactions = this.transactionRepository
@@ -61,43 +72,47 @@ export class TransactionsService {
       .orderBy('t.id', 'DESC')
       .leftJoin('t.user', 'u')
       .addSelect(['u.name'])
-      .addSelect(['u.email'])
+      .addSelect(['u.email']);
 
     if (transaction_status) {
-      transactions.andWhere(`t.transaction_status = '${transaction_status}'`)
+      transactions.andWhere(`t.transaction_status = '${transaction_status}'`);
     }
 
     if (payment_status) {
-      transactions.andWhere(`t.payment_status = '${transaction_status}'`)
+      transactions.andWhere(`t.payment_status = '${transaction_status}'`);
     }
 
     if (q != '') {
-      transactions.andWhere(`(u.name like '%${q}%' or u.email like '%${q}%' or t.address like '%${q}%')`)
+      transactions.andWhere(
+        `(u.name like '%${q}%' or u.email like '%${q}%' or t.address like '%${q}%')`,
+      );
     }
 
-    response.success = true
+    response.success = true;
     response.data = {
-      data: (await transactions.getMany()).map(transaction => {
-        transaction.created_at = this.dateLibService.convertDateYMD(transaction.created_at)
-        return transaction
+      data: (await transactions.getMany()).map((transaction) => {
+        transaction.created_at = this.dateLibService.convertDateYMD(
+          transaction.created_at,
+        );
+        return transaction;
       }),
-      count: await transactions.getCount()
-    }
+      count: await transactions.getCount(),
+    };
 
-    return response
+    return response;
   }
 
   async get(request, id: number) {
-    const response = new ResponseApi()
+    const response = new ResponseApi();
 
-    const userData = request.user.data
+    const userData = request.user.data;
     if (userData.role_id != 1) {
-      throw new UnauthorizedException()
+      throw new UnauthorizedException();
     }
 
     const transaction = await this.transactionRepository.findOne({
       where: {
-        id
+        id,
       },
       relations: {
         user: true,
@@ -116,11 +131,13 @@ export class TransactionsService {
           name: true,
           email: true,
           profile_photo_path: true,
-        }
+        },
       },
-    })
+    });
     if (!transaction) {
-      throw new HttpException(null, HttpStatus.NOT_FOUND, { cause: Error("Transaction not found!") });
+      throw new HttpException(null, HttpStatus.NOT_FOUND, {
+        cause: Error('Transaction not found!'),
+      });
     }
 
     const transaction_items = await this.transactionItemRepository
@@ -133,83 +150,104 @@ export class TransactionsService {
       .leftJoin('ti.product', 'p')
       .leftJoin('p.galleries', 'g', 'g.is_primary = 1')
       .where('ti.transaction_id = :id', { id })
-      .getRawMany()
+      .getRawMany();
 
-    transaction.created_at = this.dateLibService.convertDateYMD(transaction.created_at)
+    transaction.created_at = this.dateLibService.convertDateYMD(
+      transaction.created_at,
+    );
 
-    response.success = true
+    response.success = true;
     response.data = {
       ...transaction,
-      transaction_items
-    }
+      transaction_items,
+    };
 
-    return response
+    return response;
   }
 
-  async changePaymentStatus(request, id: number, changePaymentStatusDto: ChangePaymentStatusDto): Promise<ResponseApi> {
-    const response = new ResponseApi()
-    const validator = new Validator()
+  async changePaymentStatus(
+    request,
+    id: number,
+    changePaymentStatusDto: ChangePaymentStatusDto,
+  ): Promise<ResponseApi> {
+    const response = new ResponseApi();
+    const validator = new Validator();
 
-    const userData = request.user.data
+    const userData = request.user.data;
     if (userData.role_id != 1) {
-      throw new UnauthorizedException()
+      throw new UnauthorizedException();
     }
 
     const schema = {
-      payment_status: "string|empty:false"
-    }
+      payment_status: 'string|empty:false',
+    };
 
-    const validate = validator.validate(changePaymentStatusDto, schema)
+    const validate = validator.validate(changePaymentStatusDto, schema);
     if (validate.length > 0) {
-      throw new HttpException(validate, HttpStatus.BAD_REQUEST, { cause: new Error('Please fill in all fields!') })
+      throw new HttpException(validate, HttpStatus.BAD_REQUEST, {
+        cause: new Error('Please fill in all fields!'),
+      });
     }
 
-    const transaction = await this.transactionRepository.findOne({ where: { id } })
+    const transaction = await this.transactionRepository.findOne({
+      where: { id },
+    });
     if (!transaction) {
-      throw new HttpException(null, HttpStatus.NOT_FOUND, { cause: new Error("Transaction Not Found!") })
+      throw new HttpException(null, HttpStatus.NOT_FOUND, {
+        cause: new Error('Transaction Not Found!'),
+      });
     }
 
-    const { payment_status } = changePaymentStatusDto
+    const { payment_status } = changePaymentStatusDto;
 
-    await this.transactionRepository.update({ id }, { payment_status })
+    await this.transactionRepository.update({ id }, { payment_status });
 
-    response.data = null
-    response.success = true
+    response.data = null;
+    response.success = true;
 
-    return response
+    return response;
   }
 
-  async changeTransactionStatus(request, id: number, changeTransactionStatus: ChangeTransactionStatusDto) {
-    const response = new ResponseApi()
-    const validator = new Validator()
+  async changeTransactionStatus(
+    request,
+    id: number,
+    changeTransactionStatus: ChangeTransactionStatusDto,
+  ) {
+    const response = new ResponseApi();
+    const validator = new Validator();
 
-    const userData = request.user.data
+    const userData = request.user.data;
     if (userData.role_id != 1) {
-      throw new UnauthorizedException()
+      throw new UnauthorizedException();
     }
 
     const schema = {
-      transaction_status: "string|empty:false"
-    }
+      transaction_status: 'string|empty:false',
+    };
 
-    const validate = validator.validate(changeTransactionStatus, schema)
+    const validate = validator.validate(changeTransactionStatus, schema);
     if (validate.length > 0) {
-      throw new HttpException(validate, HttpStatus.BAD_REQUEST, { cause: new Error('Please fill in all fields!') })
+      throw new HttpException(validate, HttpStatus.BAD_REQUEST, {
+        cause: new Error('Please fill in all fields!'),
+      });
     }
 
-    const transaction = await this.transactionRepository.findOne({ where: { id } })
+    const transaction = await this.transactionRepository.findOne({
+      where: { id },
+    });
     if (!transaction) {
-      throw new HttpException(null, HttpStatus.NOT_FOUND, { cause: new Error("Transaction Not Found!") })
+      throw new HttpException(null, HttpStatus.NOT_FOUND, {
+        cause: new Error('Transaction Not Found!'),
+      });
     }
 
-    const { transaction_status } = changeTransactionStatus
+    const { transaction_status } = changeTransactionStatus;
 
-    await this.transactionRepository.update({ id }, { transaction_status })
+    await this.transactionRepository.update({ id }, { transaction_status });
 
-    response.data = null
-    response.success = true
+    response.data = null;
+    response.success = true;
 
-    return response
+    return response;
   }
-
 }

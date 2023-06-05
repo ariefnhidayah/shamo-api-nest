@@ -5,7 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-const entities = require('../entities/export-entity')
+const entities = require('../entities/export-entity');
 
 @Module({
   imports: [
@@ -13,11 +13,11 @@ const entities = require('../entities/export-entity')
     JwtModule.register({
       global: true,
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRED }
+      signOptions: { expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRED },
     }),
     TypeOrmModule.forFeature(entities),
   ],
   controllers: [UsersController],
-  providers: [UsersService]
+  providers: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}

@@ -1,9 +1,9 @@
-import { ApiProperty } from "@nestjs/swagger"
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ProductGalleryDto {
   @ApiProperty()
-  public url: string
+  public url: string;
 
   @ApiProperty()
-  public is_primary: number
+  public is_primary: number;
 }

@@ -1,15 +1,15 @@
-import { ApiProperty } from "@nestjs/swagger"
+import { ApiProperty } from '@nestjs/swagger';
 
 export class GetsProductDto {
   @ApiProperty({ required: false })
-  public page: number
+  public page: number;
 
   @ApiProperty({ required: false })
-  public limit: number
+  public limit: number;
 
   @ApiProperty({ required: false })
-  public q: string
+  public q: string;
 
   @ApiProperty({ required: false })
-  public category_id: number
+  public category_id: number;
 }

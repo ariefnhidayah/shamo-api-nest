@@ -13,10 +13,10 @@ import { Product } from './entities/product.entity';
 import { User } from './entities/user.entity';
 import { Transaction } from './entities/transaction.entity';
 import { TransactionsModule } from './transactions/transactions.module';
-import { AuthenticationModule as AdminAuthenticationModule } from './admin/authentication/authentication.module'
-import { ProductCategoriesModule as AdminProductCategoriesModule } from './admin/product-categories/product-categories.module'
-import { ProductsModule as AdminProductsModule } from './admin/products/products.module'
-import { TransactionsModule as AdminTransactionsModule } from './admin/transactions/transactions.module'
+import { AuthenticationModule as AdminAuthenticationModule } from './admin/authentication/authentication.module';
+import { ProductCategoriesModule as AdminProductCategoriesModule } from './admin/product-categories/product-categories.module';
+import { ProductsModule as AdminProductsModule } from './admin/products/products.module';
+import { TransactionsModule as AdminTransactionsModule } from './admin/transactions/transactions.module';
 import { DateLibModule } from '@app/date-lib';
 @Module({
   imports: [
@@ -30,7 +30,14 @@ import { DateLibModule } from '@app/date-lib';
       database: process.env.DB_NAME,
       synchronize: false,
       autoLoadEntities: true,
-      entities: [Product, ProductCategory, ProductGallery, Transaction, TransactionItem, User],
+      entities: [
+        Product,
+        ProductCategory,
+        ProductGallery,
+        Transaction,
+        TransactionItem,
+        User,
+      ],
       logging: true,
     }),
     DateLibModule,

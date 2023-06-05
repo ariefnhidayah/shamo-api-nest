@@ -1,15 +1,13 @@
-import { Module } from "@nestjs/common";
-import { ProductCategoriesController } from "./product-categories.controller";
-import { ProductCategoriesService } from "./product-categories.service";
-import { TypeOrmModule } from "@nestjs/typeorm";
+import { Module } from '@nestjs/common';
+import { ProductCategoriesController } from './product-categories.controller';
+import { ProductCategoriesService } from './product-categories.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-const entities = require('../entities/export-entity')
+const entities = require('../entities/export-entity');
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature(entities),
-  ],
+  imports: [TypeOrmModule.forFeature(entities)],
   controllers: [ProductCategoriesController],
-  providers: [ProductCategoriesService]
+  providers: [ProductCategoriesService],
 })
-export class ProductCategoriesModule { }
+export class ProductCategoriesModule {}

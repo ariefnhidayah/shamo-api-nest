@@ -1,6 +1,6 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdatePaymentProofDto {
   @ApiProperty()
-  public payment_proof: string
+  public payment_proof: string;
 }
