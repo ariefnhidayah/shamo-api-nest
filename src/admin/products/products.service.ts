@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from 'src/entities/product.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ResponseApi } from 'src/response-api';
 import { ProductGallery } from 'src/entities/product-gallery.entity';
@@ -302,7 +302,7 @@ export class ProductsService {
       throw new UnauthorizedException();
     }
 
-    const product = await this.productsRepository.findOne({ where: { id } });
+    const product = await this.productsRepository.findOne({ where: { id, deleted_at: IsNull() } });
     if (!product) {
       throw new HttpException(null, HttpStatus.NOT_FOUND, {
         cause: Error('Data not found!'),

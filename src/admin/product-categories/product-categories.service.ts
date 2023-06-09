@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductCategory } from 'src/entities/product-category.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, IsNull, Repository } from 'typeorm';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { ResponseApi } from 'src/response-api';
 import { GetCategoryDto } from './dto/get-category.dto';
@@ -20,7 +20,7 @@ export class ProductCategoriesService {
     private productCategoryRepository: Repository<ProductCategory>,
     private dataSource: DataSource,
     private dateLibService: DateLibService,
-  ) {}
+  ) { }
 
   async get(request, getCategoryDto: GetCategoryDto): Promise<ResponseApi> {
     const response = new ResponseApi();
@@ -169,7 +169,10 @@ export class ProductCategoriesService {
     }
 
     const category = await this.productCategoryRepository.findOne({
-      where: { id },
+      where: {
+        id,
+        deleted_at: IsNull()
+      },
     });
     if (!category) {
       throw new HttpException(null, HttpStatus.NOT_FOUND, {
@@ -185,6 +188,8 @@ export class ProductCategoriesService {
         deleted_at: this.dateLibService.getDateNow(),
       },
     );
+
+    response.success = true;
 
     return response;
   }
